@@ -9,25 +9,65 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+type Sprite struct {
+	Img  *ebiten.Image
+	x, y float64
+}
+
+type Enemy struct {
+	*Sprite
+	canFollow bool
+}
+
+type Potion struct {
+	*Sprite
+	healingPower uint
+}
+
+type Player struct {
+	*Sprite
+	Health uint
+}
+
 type Game struct {
-	PlayerImage *ebiten.Image
-	x, y        float64
+	player  *Player
+	enemies []*Enemy
+	potions []*Potion
 }
 
 func (g *Game) Update() error {
 
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.x += 1
+		g.player.x += 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.x -= 1
+		g.player.x -= 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.y += 1
+		g.player.y += 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.y -= 1
+		g.player.y -= 2
 	}
+
+	for _, sprite := range g.enemies {
+		if !sprite.canFollow {
+			continue
+		}
+		if sprite.x < g.player.x {
+			sprite.x += 1
+		}
+		if sprite.x > g.player.x {
+			sprite.x -= 1
+		}
+		if sprite.y < g.player.y {
+			sprite.y += 1
+		}
+		if sprite.y > g.player.y {
+			sprite.y -= 1
+		}
+	}
+
 	return nil
 }
 
@@ -36,13 +76,35 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{120, 180, 255, 255})
 
 	opts := ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(g.x, g.y)
+	opts.GeoM.Translate(g.player.x, g.player.y)
 	screen.DrawImage(
-		g.PlayerImage.SubImage(
+		g.player.Img.SubImage(
 			image.Rect(0, 0, 16, 16),
 		).(*ebiten.Image),
 		&opts,
 	)
+
+	for _, sprite := range g.enemies {
+		opts.GeoM.Reset()
+		opts.GeoM.Translate(sprite.x, sprite.y)
+		screen.DrawImage(
+			sprite.Img.SubImage(
+				image.Rect(0, 0, 16, 16),
+			).(*ebiten.Image),
+			&opts,
+		)
+	}
+
+	for _, sprite := range g.potions {
+		opts.GeoM.Reset()
+		opts.GeoM.Translate(sprite.x, sprite.y)
+		screen.DrawImage(
+			sprite.Img.SubImage(
+				image.Rect(0, 0, 16, 16),
+			).(*ebiten.Image),
+			&opts,
+		)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -53,12 +115,61 @@ func main() {
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("Hello, World!")
 
-	playerImage, _, err := ebitenutil.NewImageFromFile("./assets/images/ninja.png")
+	playerImg, _, err := ebitenutil.NewImageFromFile("./assets/images/ninja.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := ebiten.RunGame(&Game{PlayerImage: playerImage, x: 100, y: 100}); err != nil {
+	skeletonImg, _, err := ebitenutil.NewImageFromFile("./assets/images/skeleton.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	potionImg, _, err := ebitenutil.NewImageFromFile("./assets/images/potion.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	game := Game{
+		player: &Player{
+			Sprite: &Sprite{
+				Img: playerImg,
+				x:   100,
+				y:   100,
+			},
+			Health: 0,
+		},
+		enemies: []*Enemy{
+			{
+				&Sprite{
+					Img: skeletonImg,
+					x:   200,
+					y:   200,
+				},
+				true,
+			},
+			{
+				&Sprite{
+					Img: skeletonImg,
+					x:   300,
+					y:   100,
+				},
+				false,
+			},
+		},
+		potions: []*Potion{
+			{
+				&Sprite{
+					Img: potionImg,
+					x:   100,
+					y:   200,
+				},
+				10,
+			},
+		},
+	}
+
+	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
 	}
 }
