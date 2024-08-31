@@ -4,67 +4,48 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"rpg-tutorial/entities"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type Sprite struct {
-	Img  *ebiten.Image
-	x, y float64
-}
-
-type Enemy struct {
-	*Sprite
-	canFollow bool
-}
-
-type Potion struct {
-	*Sprite
-	healingPower uint
-}
-
-type Player struct {
-	*Sprite
-	Health uint
-}
-
 type Game struct {
-	player  *Player
-	enemies []*Enemy
-	potions []*Potion
+	player  *entities.Player
+	enemies []*entities.Enemy
+	potions []*entities.Potion
 }
 
 func (g *Game) Update() error {
 
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.player.x += 2
+		g.player.X += 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.player.x -= 2
+		g.player.X -= 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.player.y += 2
+		g.player.Y += 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.player.y -= 2
+		g.player.Y -= 2
 	}
 
 	for _, sprite := range g.enemies {
-		if !sprite.canFollow {
+		if !sprite.CanFollow {
 			continue
 		}
-		if sprite.x < g.player.x {
-			sprite.x += 1
+		if sprite.X < g.player.X {
+			sprite.X += 1
 		}
-		if sprite.x > g.player.x {
-			sprite.x -= 1
+		if sprite.X > g.player.X {
+			sprite.X -= 1
 		}
-		if sprite.y < g.player.y {
-			sprite.y += 1
+		if sprite.Y < g.player.Y {
+			sprite.Y += 1
 		}
-		if sprite.y > g.player.y {
-			sprite.y -= 1
+		if sprite.Y > g.player.Y {
+			sprite.Y -= 1
 		}
 	}
 
@@ -76,7 +57,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{120, 180, 255, 255})
 
 	opts := ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(g.player.x, g.player.y)
+	opts.GeoM.Translate(g.player.X, g.player.Y)
 	screen.DrawImage(
 		g.player.Img.SubImage(
 			image.Rect(0, 0, 16, 16),
@@ -86,7 +67,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, sprite := range g.enemies {
 		opts.GeoM.Reset()
-		opts.GeoM.Translate(sprite.x, sprite.y)
+		opts.GeoM.Translate(sprite.X, sprite.Y)
 		screen.DrawImage(
 			sprite.Img.SubImage(
 				image.Rect(0, 0, 16, 16),
@@ -97,7 +78,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, sprite := range g.potions {
 		opts.GeoM.Reset()
-		opts.GeoM.Translate(sprite.x, sprite.y)
+		opts.GeoM.Translate(sprite.X, sprite.Y)
 		screen.DrawImage(
 			sprite.Img.SubImage(
 				image.Rect(0, 0, 16, 16),
@@ -131,40 +112,40 @@ func main() {
 	}
 
 	game := Game{
-		player: &Player{
-			Sprite: &Sprite{
+		player: &entities.Player{
+			Sprite: &entities.Sprite{
 				Img: playerImg,
-				x:   100,
-				y:   100,
+				X:   100,
+				Y:   100,
 			},
 			Health: 0,
 		},
-		enemies: []*Enemy{
+		enemies: []*entities.Enemy{
 			{
-				&Sprite{
+				Sprite: &entities.Sprite{
 					Img: skeletonImg,
-					x:   200,
-					y:   200,
+					X:   200,
+					Y:   200,
 				},
-				true,
+				CanFollow: true,
 			},
 			{
-				&Sprite{
+				Sprite: &entities.Sprite{
 					Img: skeletonImg,
-					x:   300,
-					y:   100,
+					X:   300,
+					Y:   100,
 				},
-				false,
+				CanFollow: false,
 			},
 		},
-		potions: []*Potion{
+		potions: []*entities.Potion{
 			{
-				&Sprite{
+				Sprite: &entities.Sprite{
 					Img: potionImg,
-					x:   100,
-					y:   200,
+					X:   100,
+					Y:   200,
 				},
-				10,
+				HealingPower: 10,
 			},
 		},
 	}
