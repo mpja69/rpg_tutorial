@@ -60,17 +60,14 @@ func (g *Game) Update() error {
 
 	// HACK:	Testar att få Potion om man är nära
 	for _, potion := range g.potions {
-		if !potion.CloseToPlayer &&
+		if potion.HealingPower > 0 &&
 			g.player.X+16 > potion.X &&
 			g.player.X < potion.X+16 &&
 			g.player.Y+16 > potion.Y &&
 			g.player.Y < potion.Y+16 {
-			g.player.Health += 1
-			potion.HealingPower -= 1
-			potion.CloseToPlayer = true
+			g.player.Health += potion.HealingPower
+			potion.HealingPower = 0
 			fmt.Println("Got Health:", g.player.Health)
-		} else {
-			potion.CloseToPlayer = false
 		}
 
 	}
@@ -145,6 +142,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	for _, sprite := range g.potions {
+		// HACK: Om poition är slut...rita inte
+		if sprite.HealingPower <= 0 {
+			continue
+		}
 		opts.GeoM.Reset()
 		// Move according to the Potion
 		opts.GeoM.Translate(sprite.X, sprite.Y)
@@ -227,6 +228,22 @@ func main() {
 					Y:   200,
 				},
 				HealingPower: 10,
+			},
+			{
+				Sprite: &entities.Sprite{
+					Img: potionImg,
+					X:   50,
+					Y:   300,
+				},
+				HealingPower: 40,
+			},
+			{
+				Sprite: &entities.Sprite{
+					Img: potionImg,
+					X:   310,
+					Y:   150,
+				},
+				HealingPower: 20,
 			},
 		},
 		tilemapJSON: tilemapJSON,
