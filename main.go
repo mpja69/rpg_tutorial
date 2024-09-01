@@ -10,12 +10,18 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+const (
+	SCREEN_WIDTH  = 320
+	SCREEN_HEIGHT = 240
+)
+
 type Game struct {
 	player      *entities.Player
 	enemies     []*entities.Enemy
 	potions     []*entities.Potion
 	tilemapJSON *TilemapJSON
 	tilemapImg  *ebiten.Image
+	camera      *Camera
 }
 
 func (g *Game) Update() error {
@@ -50,6 +56,7 @@ func (g *Game) Update() error {
 			sprite.Y -= 1.0
 		}
 	}
+	g.camera.followTarget(g.player.X, g.player.Y, SCREEN_WIDTH, SCREEN_HEIGHT)
 
 	return nil
 }
@@ -71,7 +78,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			srcX *= 16
 			srcY *= 16
 
+			// Move according to the current tile
 			opts.GeoM.Translate(float64(x), float64(y))
+
+			// Move according to the Camera
+			opts.GeoM.Translate(g.camera.X, g.camera.Y)
+
 			screen.DrawImage(
 				g.tilemapImg.SubImage(image.Rect(srcX, srcY, srcX+16, srcY+16)).(*ebiten.Image),
 				&opts,
@@ -80,7 +92,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	// Move according to the Player
 	opts.GeoM.Translate(g.player.X, g.player.Y)
+	// Move according to the Camera
+	opts.GeoM.Translate(g.camera.X, g.camera.Y)
+
 	screen.DrawImage(
 		g.player.Img.SubImage(
 			image.Rect(0, 0, 16, 16),
@@ -90,7 +106,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, sprite := range g.enemies {
 		opts.GeoM.Reset()
+		// Move according to the Enemy
 		opts.GeoM.Translate(sprite.X, sprite.Y)
+		// Move according to the Camera
+		opts.GeoM.Translate(g.camera.X, g.camera.Y)
 		screen.DrawImage(
 			sprite.Img.SubImage(
 				image.Rect(0, 0, 16, 16),
@@ -101,7 +120,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, sprite := range g.potions {
 		opts.GeoM.Reset()
+		// Move according to the Potion
 		opts.GeoM.Translate(sprite.X, sprite.Y)
+		// Move according to the Camera
+		opts.GeoM.Translate(g.camera.X, g.camera.Y)
 		screen.DrawImage(
 			sprite.Img.SubImage(
 				image.Rect(0, 0, 16, 16),
@@ -112,7 +134,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 320, 240
+	return SCREEN_WIDTH, SCREEN_HEIGHT
 }
 
 func main() {
@@ -183,6 +205,7 @@ func main() {
 		},
 		tilemapJSON: tilemapJSON,
 		tilemapImg:  tilemapImg,
+		camera:      NewCamera(0, 0),
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {

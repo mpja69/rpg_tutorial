@@ -3,10 +3,24 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "spawn.json",
     "expandedProjectPaths": [
+        "TileSets",
+        "."
     ],
     "fileStates": {
+        "TileSets/TilesetFloor.tsx": {
+            "scaleInDock": 1.6,
+            "scaleInEditor": 2.1246
+        },
+        "spawn.json": {
+            "scale": 1.2577,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 255.22779677188518,
+                "y": 259.2033076250298
+            }
+        }
     },
     "last.imagePath": "/Users/magnus/Code/go/rpg_tutorial/assets/images",
     "map.height": 80,
@@ -15,9 +29,13 @@
     "map.tileWidth": 16,
     "map.width": 100,
     "openFiles": [
+        "spawn.json",
+        "TileSets/TilesetFloor.tsx"
     ],
     "project": "rpg.tiled-project",
     "recentFiles": [
+        "TileSets/TilesetFloor.tsx",
+        "spawn.json"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
