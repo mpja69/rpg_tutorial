@@ -2,5 +2,6 @@ package entities
 
 type Potion struct {
 	*Sprite
-	HealingPower uint
+	HealingPower  uint
+	CloseToPlayer bool
 }

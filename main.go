@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -56,8 +57,33 @@ func (g *Game) Update() error {
 			sprite.Y -= 1.0
 		}
 	}
-	g.camera.followTarget(g.player.X, g.player.Y, SCREEN_WIDTH, SCREEN_HEIGHT)
 
+	// HACK:	Testar att få Potion om man är nära
+	for _, potion := range g.potions {
+		if !potion.CloseToPlayer &&
+			g.player.X+16 > potion.X &&
+			g.player.X < potion.X+16 &&
+			g.player.Y+16 > potion.Y &&
+			g.player.Y < potion.Y+16 {
+			g.player.Health += 1
+			potion.HealingPower -= 1
+			potion.CloseToPlayer = true
+			fmt.Println("Got Health:", g.player.Health)
+		} else {
+			potion.CloseToPlayer = false
+		}
+
+	}
+
+	// HACK:	För att korrekt följa spelaren, måste justera för origo från TopLeft till Center
+	//			Hårdkodat: spelaren är 16 stor, så lägg till hälften: 8
+	g.camera.FollowTarget(g.player.X+8, g.player.Y+8, SCREEN_WIDTH, SCREEN_HEIGHT)
+	g.camera.Contrain(
+		float64(g.tilemapJSON.Layers[0].Width)*16.0,
+		float64(g.tilemapJSON.Layers[0].Height)*16.0,
+		SCREEN_WIDTH,
+		SCREEN_HEIGHT,
+	)
 	return nil
 }
 
