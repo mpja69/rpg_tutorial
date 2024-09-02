@@ -9,37 +9,59 @@
         "."
     ],
     "fileStates": {
-        "TileSets/TilesetFloor.tsx": {
+        "TileSets/TilesetFloor.json": {
+            "dynamicWrapping": false,
             "scaleInDock": 1.6,
-            "scaleInEditor": 2.1246
+            "scaleInEditor": 2.88
+        },
+        "TileSets/TilesetFloor.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.6,
+            "scaleInEditor": 2.88
+        },
+        "TileSets/buildings.json": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "TileSets/buildings.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2.88
         },
         "spawn.json": {
-            "scale": 1.2577,
+            "scale": 1.7335,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 255.22779677188518,
-                "y": 259.2033076250298
+                "x": 283.8188635708105,
+                "y": 153.44678396308046
             }
         }
     },
-    "last.imagePath": "/Users/magnus/Code/go/rpg_tutorial/assets/images",
-    "map.height": 80,
+    "last.externalTilesetPath": "/Users/magnus/Code/go/rpg_tutorial/assets/maps/TileSets",
+    "last.imagePath": "/Users/magnus/Code/go/rpg_tutorial/assets/images/buildings",
+    "map.height": 3,
     "map.lastUsedFormat": "json",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
-    "map.width": 100,
+    "map.width": 3,
     "openFiles": [
         "spawn.json",
-        "TileSets/TilesetFloor.tsx"
+        "TileSets/TilesetFloor.json",
+        "TileSets/buildings.json"
     ],
     "project": "rpg.tiled-project",
     "recentFiles": [
+        "TileSets/buildings.json",
+        "TileSets/TilesetFloor.json",
+        "spawn.json",
         "TileSets/TilesetFloor.tsx",
-        "spawn.json"
+        "TileSets/buildings.tsx"
     ],
-    "tileset.lastUsedFormat": "tsx",
+    "tileset.lastUsedFilter": "JSON tileset files (*.tsj *.json)",
+    "tileset.lastUsedFormat": "json",
     "tileset.tileSize": {
         "height": 16,
         "width": 16
-    }
+    },
+    "tileset.type": 1
 }

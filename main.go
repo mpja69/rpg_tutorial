@@ -21,6 +21,7 @@ type Game struct {
 	enemies     []*entities.Enemy
 	potions     []*entities.Potion
 	tilemapJSON *TilemapJSON
+	tilesets    []Tileset
 	tilemapImg  *ebiten.Image
 	camera      *Camera
 }
@@ -89,28 +90,28 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	opts := ebiten.DrawImageOptions{}
 
-	for _, layer := range g.tilemapJSON.Layers {
+	for layerIndex, layer := range g.tilemapJSON.Layers {
+		// fmt.Printf("LayerIndex: %d, \nLayer: %T\n%v\n\n", layerIndex, layer, layer)
 		for index, id := range layer.Data {
+
+			if id == 0 {
+				continue
+			}
 			x := index % layer.Width
 			y := index / layer.Width
 			x *= 16
 			y *= 16
 
-			srcX := (id - 1) % 22
-			srcY := (id - 1) / 22
-			srcX *= 16
-			srcY *= 16
+			img := g.tilesets[layerIndex].Img(id)
 
 			// Move according to the current tile
 			opts.GeoM.Translate(float64(x), float64(y))
-
+			// Move according to the tiles anchor point (Top-Left instead of Bottom-Left)
+			opts.GeoM.Translate(0.0, -float64(img.Bounds().Dy()+16))
 			// Move according to the Camera
 			opts.GeoM.Translate(g.camera.X, g.camera.Y)
 
-			screen.DrawImage(
-				g.tilemapImg.SubImage(image.Rect(srcX, srcY, srcX+16, srcY+16)).(*ebiten.Image),
-				&opts,
-			)
+			screen.DrawImage(img, &opts)
 			opts.GeoM.Reset()
 		}
 	}
@@ -187,6 +188,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	//fmt.Printf("Tilemap (spawn): %v\n\n", tilemapJSON)
+
+	tilesets, err := tilemapJSON.GenTilesets()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	tilemapImg, _, err := ebitenutil.NewImageFromFile("./assets/images/TilesetFloor.png")
 	if err != nil {
@@ -247,6 +254,7 @@ func main() {
 			},
 		},
 		tilemapJSON: tilemapJSON,
+		tilesets:    tilesets,
 		tilemapImg:  tilemapImg,
 		camera:      NewCamera(0, 0),
 	}
