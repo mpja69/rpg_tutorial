@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type TilemapLayerJSON struct {
@@ -41,6 +43,34 @@ func NewTilemapJSON(filepath string) (*TilemapJSON, error) {
 		return nil, err
 	}
 	return &tilemapJSON, nil
+}
+
+func (tl *TilemapLayerJSON) Draw(screen *ebiten.Image, tileset Tileset, camera *Camera) {
+	opts := ebiten.DrawImageOptions{}
+	for index, id := range tl.Data {
+
+		if id == 0 {
+			continue
+		}
+		x := index % tl.Width
+		y := index / tl.Width
+		x *= 16
+		y *= 16
+
+		img := tileset.Img(id)
+
+		// Move according to the current tile
+		opts.GeoM.Translate(float64(x), float64(y))
+		// Move according to the tiles anchor point (Top-Left instead of Bottom-Left)
+		opts.GeoM.Translate(0.0, -float64(img.Bounds().Dy()+16))
+
+		// Move according to the Camera
+		opts.GeoM.Translate(camera.X, camera.Y)
+
+		screen.DrawImage(img, &opts)
+		opts.GeoM.Reset()
+	}
+
 }
 
 // vim: ts=4

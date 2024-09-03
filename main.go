@@ -46,9 +46,9 @@ type Game struct {
 	potions     []*entities.Potion
 	tilemapJSON *TilemapJSON
 	tilesets    []Tileset
-	tilemapImg  *ebiten.Image
-	camera      *Camera
-	colliders   []image.Rectangle
+	// tilemapImg  *ebiten.Image
+	camera    *Camera
+	colliders []image.Rectangle
 }
 
 func (g *Game) Update() error {
@@ -132,78 +132,37 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{120, 180, 255, 255})
 
-	opts := ebiten.DrawImageOptions{}
-
+	// Draw layers in the map
 	for layerIndex, layer := range g.tilemapJSON.Layers {
-		// fmt.Printf("LayerIndex: %d, \nLayer: %T\n%v\n\n", layerIndex, layer, layer)
-		for index, id := range layer.Data {
-
-			if id == 0 {
-				continue
-			}
-			x := index % layer.Width
-			y := index / layer.Width
-			x *= 16
-			y *= 16
-
-			img := g.tilesets[layerIndex].Img(id)
-
-			// Move according to the current tile
-			opts.GeoM.Translate(float64(x), float64(y))
-			// Move according to the tiles anchor point (Top-Left instead of Bottom-Left)
-			opts.GeoM.Translate(0.0, -float64(img.Bounds().Dy()+16))
-			// Move according to the Camera
-			opts.GeoM.Translate(g.camera.X, g.camera.Y)
-
-			screen.DrawImage(img, &opts)
-			opts.GeoM.Reset()
-		}
+		layer.Draw(screen, g.tilesets[layerIndex], g.camera)
+		// layer.Draw(screen, g.tilesets[layerIndex], func(o *ebiten.DrawImageOptions) {
+		// 	o.GeoM.Translate(g.camera.X, g.camera.Y)
+		// })
 	}
 
-	// Move according to the Player
-	opts.GeoM.Translate(g.player.X, g.player.Y)
-	// Move according to the Camera
-	opts.GeoM.Translate(g.camera.X, g.camera.Y)
+	// Draw Player
+	g.player.Draw(screen, func(o *ebiten.DrawImageOptions) {
+		o.GeoM.Translate(g.camera.X, g.camera.Y)
+	})
 
-	screen.DrawImage(
-		g.player.Img.SubImage(
-			image.Rect(0, 0, 16, 16),
-		).(*ebiten.Image),
-		&opts,
-	)
-
-	for _, sprite := range g.enemies {
-		opts.GeoM.Reset()
-		// Move according to the Enemy
-		opts.GeoM.Translate(sprite.X, sprite.Y)
-		// Move according to the Camera
-		opts.GeoM.Translate(g.camera.X, g.camera.Y)
-		screen.DrawImage(
-			sprite.Img.SubImage(
-				image.Rect(0, 0, 16, 16),
-			).(*ebiten.Image),
-			&opts,
-		)
+	// Draw Enemies
+	for _, enemy := range g.enemies {
+		enemy.Draw(screen, func(o *ebiten.DrawImageOptions) {
+			o.GeoM.Translate(g.camera.X, g.camera.Y)
+		})
 	}
 
-	for _, sprite := range g.potions {
-		// HACK: Om poition är slut...rita inte
-		if sprite.HealingPower <= 0 {
+	// Draw Potions
+	for _, potion := range g.potions {
+		if potion.HealingPower <= 0 {
 			continue
 		}
-		opts.GeoM.Reset()
-		// Move according to the Potion
-		opts.GeoM.Translate(sprite.X, sprite.Y)
-		// Move according to the Camera
-		opts.GeoM.Translate(g.camera.X, g.camera.Y)
-		screen.DrawImage(
-			sprite.Img.SubImage(
-				image.Rect(0, 0, 16, 16),
-			).(*ebiten.Image),
-			&opts,
-		)
+		potion.Draw(screen, func(o *ebiten.DrawImageOptions) {
+			o.GeoM.Translate(g.camera.X, g.camera.Y)
+		})
 	}
 
+	// Draw Colliders
 	for _, collider := range g.colliders {
 		vector.StrokeRect(
 			screen,
@@ -252,7 +211,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tilemapImg, _, err := ebitenutil.NewImageFromFile("./assets/images/TilesetFloor.png")
+	// tilemapImg, _, err := ebitenutil.NewImageFromFile("./assets/images/TilesetFloor.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -312,8 +271,8 @@ func main() {
 		},
 		tilemapJSON: tilemapJSON,
 		tilesets:    tilesets,
-		tilemapImg:  tilemapImg,
-		camera:      NewCamera(0, 0),
+		// tilemapImg:  tilemapImg,
+		camera: NewCamera(0, 0),
 		colliders: []image.Rectangle{
 			image.Rect(120, 120, 136, 136),
 		},
