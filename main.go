@@ -5,7 +5,9 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"rpg-tutorial/animations"
 	"rpg-tutorial/entities"
+	"rpg-tutorial/spritesheet"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -52,6 +54,7 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
+	g.player.RunningAnimation.Update()
 
 	g.player.Dx = 0
 	g.player.Dy = 0
@@ -216,29 +219,43 @@ func main() {
 		log.Fatal(err)
 	}
 
+	playerSpriteSheet := spritesheet.NewSpriteSheet(4, 7, 16)
+	enemySpriteSheet := spritesheet.NewSpriteSheet(4, 7, 16)
+	potionSpriteSheet := spritesheet.NewSpriteSheet(1, 1, 16)
+
+	playerRunningAnimation := animations.NewAnimation(0, 12, 4, 10.0)
+	enemyRunningAnimation := animations.NewAnimation(4, 12, 4, 20.0)
+	potionRunningAnimation := animations.NewAnimation(1, 1, 0, 0.0)
+
 	game := Game{
 		player: &entities.Player{
 			Sprite: &entities.Sprite{
-				Img: playerImg,
-				X:   100,
-				Y:   100,
+				Img:              playerImg,
+				X:                100,
+				Y:                100,
+				SpriteSheet:      playerSpriteSheet,
+				RunningAnimation: playerRunningAnimation,
 			},
 			Health: 0,
 		},
 		enemies: []*entities.Enemy{
 			{
 				Sprite: &entities.Sprite{
-					Img: skeletonImg,
-					X:   200,
-					Y:   200,
+					Img:              skeletonImg,
+					X:                200,
+					Y:                200,
+					SpriteSheet:      enemySpriteSheet,
+					RunningAnimation: enemyRunningAnimation,
 				},
 				CanFollow: true,
 			},
 			{
 				Sprite: &entities.Sprite{
-					Img: skeletonImg,
-					X:   300,
-					Y:   100,
+					Img:              skeletonImg,
+					X:                300,
+					Y:                100,
+					SpriteSheet:      enemySpriteSheet,
+					RunningAnimation: enemyRunningAnimation,
 				},
 				CanFollow: false,
 			},
@@ -246,25 +263,31 @@ func main() {
 		potions: []*entities.Potion{
 			{
 				Sprite: &entities.Sprite{
-					Img: potionImg,
-					X:   100,
-					Y:   200,
+					Img:              potionImg,
+					X:                100,
+					Y:                200,
+					SpriteSheet:      potionSpriteSheet,
+					RunningAnimation: potionRunningAnimation,
 				},
 				HealingPower: 10,
 			},
 			{
 				Sprite: &entities.Sprite{
-					Img: potionImg,
-					X:   50,
-					Y:   300,
+					Img:              potionImg,
+					X:                50,
+					Y:                300,
+					SpriteSheet:      potionSpriteSheet,
+					RunningAnimation: potionRunningAnimation,
 				},
 				HealingPower: 40,
 			},
 			{
 				Sprite: &entities.Sprite{
-					Img: potionImg,
-					X:   310,
-					Y:   150,
+					Img:              potionImg,
+					X:                310,
+					Y:                150,
+					SpriteSheet:      potionSpriteSheet,
+					RunningAnimation: potionRunningAnimation,
 				},
 				HealingPower: 20,
 			},
