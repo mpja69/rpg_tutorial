@@ -60,20 +60,4 @@ func (p *Player) Draw(screen *ebiten.Image, translateFunc func(*ebiten.DrawImage
 		).(*ebiten.Image),
 		&opts,
 	)
-
-}
-func (p *Player) ActiveAnimation(dx, dy int) *animations.Animation {
-	if dx > 0 {
-		return p.Animations[Right]
-	}
-	if dx < 0 {
-		return p.Animations[Left]
-	}
-	if dy > 0 {
-		return p.Animations[Down]
-	}
-	if dy < 0 {
-		return p.Animations[Up]
-	}
-	return p.Animations[Down] // Maybe return DOWN as default...because it's facing forward?
 }

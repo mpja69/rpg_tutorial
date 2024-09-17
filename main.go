@@ -19,29 +19,6 @@ const (
 	SCREEN_HEIGHT = 240
 )
 
-func CheckCollisionX(sprite *entities.Sprite, colliders []image.Rectangle) {
-	for _, collider := range colliders {
-		if collider.Overlaps(image.Rect(int(sprite.X), int(sprite.Y), int(sprite.X)+16, int(sprite.Y)+16)) {
-			if sprite.Dx > 0 {
-				sprite.X = float64(collider.Min.X) - 16
-			} else if sprite.Dx < 0 {
-				sprite.X = float64(collider.Max.X)
-			}
-		}
-	}
-}
-func CheckCollisionY(sprite *entities.Sprite, colliders []image.Rectangle) {
-	for _, collider := range colliders {
-		if collider.Overlaps(image.Rect(int(sprite.X), int(sprite.Y), int(sprite.X)+16, int(sprite.Y)+16)) {
-			if sprite.Dy > 0 {
-				sprite.Y = float64(collider.Min.Y) - 16
-			} else if sprite.Dy < 0 {
-				sprite.Y = float64(collider.Max.Y)
-			}
-		}
-	}
-}
-
 type Game struct {
 	player      *entities.Player
 	enemies     []*entities.Enemy
@@ -54,66 +31,19 @@ type Game struct {
 
 func (g *Game) Update() error {
 
-	// g.player.Dx = 0
-	// g.player.Dy = 0
-	// if ebiten.IsKeyPressed(ebiten.KeyRight) {
-	// 	g.player.Dx = 2.0
-	// }
-	// if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-	// 	g.player.Dx = -2.0
-	// }
-	// if ebiten.IsKeyPressed(ebiten.KeyDown) {
-	// 	g.player.Dy = 2.0
-	// }
-	// if ebiten.IsKeyPressed(ebiten.KeyUp) {
-	// 	g.player.Dy = -2.0
-	// }
-	//
-	// g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy)).Update()
 	g.player.Update()
-
-	g.player.X += g.player.Dx
-	CheckCollisionX(g.player.Sprite, g.colliders)
-
-	g.player.Y += g.player.Dy
-	CheckCollisionY(g.player.Sprite, g.colliders)
+	g.player.AdjustForColliders(g.colliders)
 
 	// HACK: Få enemies att följa mig
 
 	for _, enemy := range g.enemies {
-		enemy.Dx = 0
-		enemy.Dy = 0
-
-		if !enemy.CanFollow {
-			continue
-		}
-		if enemy.X < g.player.X {
-			enemy.Dx += 1.0
-		}
-		if enemy.X > g.player.X {
-			enemy.Dx -= 1.0
-		}
-		if enemy.Y < g.player.Y {
-			enemy.Dy += 1.0
-		}
-		if enemy.Y > g.player.Y {
-			enemy.Dy -= 1.0
-		}
-
-		enemy.X += enemy.Dx
-		CheckCollisionX(enemy.Sprite, g.colliders)
-
-		enemy.Y += enemy.Dy
-		CheckCollisionY(enemy.Sprite, g.colliders)
+		enemy.Update()
+		enemy.AdjustForColliders(g.colliders)
 	}
 
-	// HACK:	Testar att få Potion om man är nära
+	// HACK:	Testar att få Potion
 	for _, potion := range g.potions {
-		if potion.HealingPower > 0 &&
-			g.player.X+16 > potion.X &&
-			g.player.X < potion.X+16 &&
-			g.player.Y+16 > potion.Y &&
-			g.player.Y < potion.Y+16 {
+		if potion.HealingPower > 0 && g.player.Rect().Overlaps(potion.Rect()) {
 			g.player.Health += potion.HealingPower
 			potion.HealingPower = 0
 			fmt.Println("Got Health:", g.player.Health)
@@ -221,10 +151,6 @@ func main() {
 	enemySpriteSheet := spritesheet.NewSpriteSheet(4, 7, 16)
 	potionSpriteSheet := spritesheet.NewSpriteSheet(1, 1, 16)
 
-	// playerRunningAnimation := animations.NewAnimation(0, 12, 4, 10.0)
-	// enemyRunningAnimation := animations.NewAnimation(4, 12, 4, 20.0)
-	// potionRunningAnimation := animations.NewAnimation(1, 1, 0, 0.0)
-
 	game := Game{
 		player: &entities.Player{
 			Sprite: &entities.Sprite{
@@ -297,6 +223,11 @@ func main() {
 		colliders: []image.Rectangle{
 			image.Rect(120, 120, 136, 136),
 		},
+	}
+
+	//HACK: Måste sätta denna relation i efterhand eftersom de skapas i samma struct ovan.
+	for _, enemy := range game.enemies {
+		enemy.Player = game.player
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {
