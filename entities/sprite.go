@@ -1,17 +1,16 @@
 package entities
 
 import (
-	"rpg-tutorial/animations"
+	"image"
 	"rpg-tutorial/spritesheet"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Sprite struct {
-	Img              *ebiten.Image
-	X, Y, Dx, Dy     float64
-	SpriteSheet      *spritesheet.SpriteSheet
-	RunningAnimation *animations.Animation
+	Img          *ebiten.Image
+	X, Y, Dx, Dy float64
+	SpriteSheet  *spritesheet.SpriteSheet
 }
 
 func (s *Sprite) Draw(screen *ebiten.Image, translateFunc func(*ebiten.DrawImageOptions)) {
@@ -23,7 +22,7 @@ func (s *Sprite) Draw(screen *ebiten.Image, translateFunc func(*ebiten.DrawImage
 
 	screen.DrawImage(
 		s.Img.SubImage(
-			s.SpriteSheet.Rect(s.RunningAnimation.Frame()),
+			image.Rect(0, 0, 16, 16),
 		).(*ebiten.Image),
 		&opts,
 	)

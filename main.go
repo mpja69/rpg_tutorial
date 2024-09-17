@@ -54,7 +54,6 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	g.player.RunningAnimation.Update()
 
 	g.player.Dx = 0
 	g.player.Dy = 0
@@ -70,6 +69,8 @@ func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		g.player.Dy = -2.0
 	}
+
+	g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy)).Update()
 
 	g.player.X += g.player.Dx
 	CheckCollisionX(g.player.Sprite, g.colliders)
@@ -138,9 +139,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw layers in the map
 	for layerIndex, layer := range g.tilemapJSON.Layers {
 		layer.Draw(screen, g.tilesets[layerIndex], g.camera)
-		// layer.Draw(screen, g.tilesets[layerIndex], func(o *ebiten.DrawImageOptions) {
-		// 	o.GeoM.Translate(g.camera.X, g.camera.Y)
-		// })
 	}
 
 	// Draw Player
@@ -223,39 +221,42 @@ func main() {
 	enemySpriteSheet := spritesheet.NewSpriteSheet(4, 7, 16)
 	potionSpriteSheet := spritesheet.NewSpriteSheet(1, 1, 16)
 
-	playerRunningAnimation := animations.NewAnimation(0, 12, 4, 10.0)
-	enemyRunningAnimation := animations.NewAnimation(4, 12, 4, 20.0)
-	potionRunningAnimation := animations.NewAnimation(1, 1, 0, 0.0)
+	// playerRunningAnimation := animations.NewAnimation(0, 12, 4, 10.0)
+	// enemyRunningAnimation := animations.NewAnimation(4, 12, 4, 20.0)
+	// potionRunningAnimation := animations.NewAnimation(1, 1, 0, 0.0)
 
 	game := Game{
 		player: &entities.Player{
 			Sprite: &entities.Sprite{
-				Img:              playerImg,
-				X:                100,
-				Y:                100,
-				SpriteSheet:      playerSpriteSheet,
-				RunningAnimation: playerRunningAnimation,
+				Img:         playerImg,
+				X:           100,
+				Y:           100,
+				SpriteSheet: playerSpriteSheet,
 			},
 			Health: 0,
+			Animations: map[entities.PlayerDirection]*animations.Animation{
+				entities.Down:  animations.NewAnimation(0, 12, 4, 10.0),
+				entities.Up:    animations.NewAnimation(1, 13, 4, 10.0),
+				entities.Left:  animations.NewAnimation(2, 14, 4, 10.0),
+				entities.Right: animations.NewAnimation(3, 15, 4, 10.0),
+			},
 		},
 		enemies: []*entities.Enemy{
 			{
 				Sprite: &entities.Sprite{
-					Img:              skeletonImg,
-					X:                200,
-					Y:                200,
-					SpriteSheet:      enemySpriteSheet,
-					RunningAnimation: enemyRunningAnimation,
+					Img:         skeletonImg,
+					X:           200,
+					Y:           200,
+					SpriteSheet: enemySpriteSheet,
 				},
 				CanFollow: true,
 			},
 			{
 				Sprite: &entities.Sprite{
-					Img:              skeletonImg,
-					X:                300,
-					Y:                100,
-					SpriteSheet:      enemySpriteSheet,
-					RunningAnimation: enemyRunningAnimation,
+					Img:         skeletonImg,
+					X:           300,
+					Y:           100,
+					SpriteSheet: enemySpriteSheet,
 				},
 				CanFollow: false,
 			},
@@ -263,31 +264,28 @@ func main() {
 		potions: []*entities.Potion{
 			{
 				Sprite: &entities.Sprite{
-					Img:              potionImg,
-					X:                100,
-					Y:                200,
-					SpriteSheet:      potionSpriteSheet,
-					RunningAnimation: potionRunningAnimation,
+					Img:         potionImg,
+					X:           100,
+					Y:           200,
+					SpriteSheet: potionSpriteSheet,
 				},
 				HealingPower: 10,
 			},
 			{
 				Sprite: &entities.Sprite{
-					Img:              potionImg,
-					X:                50,
-					Y:                300,
-					SpriteSheet:      potionSpriteSheet,
-					RunningAnimation: potionRunningAnimation,
+					Img:         potionImg,
+					X:           50,
+					Y:           300,
+					SpriteSheet: potionSpriteSheet,
 				},
 				HealingPower: 40,
 			},
 			{
 				Sprite: &entities.Sprite{
-					Img:              potionImg,
-					X:                310,
-					Y:                150,
-					SpriteSheet:      potionSpriteSheet,
-					RunningAnimation: potionRunningAnimation,
+					Img:         potionImg,
+					X:           310,
+					Y:           150,
+					SpriteSheet: potionSpriteSheet,
 				},
 				HealingPower: 20,
 			},
