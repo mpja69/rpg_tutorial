@@ -48,29 +48,29 @@ type Game struct {
 	potions     []*entities.Potion
 	tilemapJSON *TilemapJSON
 	tilesets    []Tileset
-	// tilemapImg  *ebiten.Image
-	camera    *Camera
-	colliders []image.Rectangle
+	camera      *Camera
+	colliders   []image.Rectangle
 }
 
 func (g *Game) Update() error {
 
-	g.player.Dx = 0
-	g.player.Dy = 0
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.player.Dx = 2.0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.player.Dx = -2.0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.player.Dy = 2.0
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.player.Dy = -2.0
-	}
-
-	g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy)).Update()
+	// g.player.Dx = 0
+	// g.player.Dy = 0
+	// if ebiten.IsKeyPressed(ebiten.KeyRight) {
+	// 	g.player.Dx = 2.0
+	// }
+	// if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+	// 	g.player.Dx = -2.0
+	// }
+	// if ebiten.IsKeyPressed(ebiten.KeyDown) {
+	// 	g.player.Dy = 2.0
+	// }
+	// if ebiten.IsKeyPressed(ebiten.KeyUp) {
+	// 	g.player.Dy = -2.0
+	// }
+	//
+	// g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy)).Update()
+	g.player.Update()
 
 	g.player.X += g.player.Dx
 	CheckCollisionX(g.player.Sprite, g.colliders)
